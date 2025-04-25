@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { ethers } from "ethers"
 import { Button } from "@/components/ui/button"
 import { connectWallet, isWalletConnected, getCurrentAccount, isAccountOwner } from "@/lib/blockchain"
 import { useToast } from "@/hooks/use-toast"
@@ -23,6 +24,7 @@ export default function WalletConnect({
   className,
 }: WalletConnectProps) {
   const [address, setAddress] = useState<string | null>(null)
+  const [balance, setBalance] = useState<string | null>(null)
   const [isConnecting, setIsConnecting] = useState(false)
   const [isOwner, setIsOwner] = useState(false)
   const { toast } = useToast()
@@ -35,6 +37,9 @@ export default function WalletConnect({
           const account = getCurrentAccount()
           setAddress(account)
           setIsOwner(isAccountOwner())
+          if (account) {
+            await fetchBalance(account)
+          }
           if (onConnect && account) {
             onConnect(account)
           }
@@ -47,12 +52,25 @@ export default function WalletConnect({
     checkConnection()
   }, [onConnect])
 
+  const fetchBalance = async (account: string) => {
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum)
+      const balance = await provider.getBalance(account)
+      setBalance(ethers.formatEther(balance)) // Convert balance to Ether
+    } catch (error) {
+      console.error("Error fetching balance:", error)
+    }
+  }
+
   const handleConnect = async () => {
     setIsConnecting(true)
     try {
       const account = await connectWallet()
       setAddress(account)
       setIsOwner(isAccountOwner())
+      if (account) {
+        await fetchBalance(account)
+      }
       toast({
         title: "Wallet Connected",
         description: "Your wallet has been connected successfully.",
@@ -72,9 +90,8 @@ export default function WalletConnect({
   }
 
   const handleDisconnect = () => {
-    // Note: MetaMask doesn't have a true disconnect method through their API
-    // The best approach is to clear the local state
     setAddress(null)
+    setBalance(null)
     setIsOwner(false)
     
     toast({
@@ -85,12 +102,8 @@ export default function WalletConnect({
     if (onDisconnect) {
       onDisconnect()
     }
-    
-    // Optional: Reload the page to ensure a clean state
-    // window.location.reload()
   }
 
-  // Format address to show first char and last 4 chars
   const formatShortAddress = (addr: string) => {
     if (!addr) return ""
     return `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`
@@ -132,6 +145,11 @@ export default function WalletConnect({
       )}
       {isOwner && address && (
         <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">Owner</Badge>
+      )}
+      {address && balance && (
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          Balance: {balance} ETH
+        </div>
       )}
     </div>
   )

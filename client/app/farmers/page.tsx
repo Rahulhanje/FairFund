@@ -159,7 +159,7 @@ export default function FarmersPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredFarmers.map((farmer) => (
             <Card key={farmer.id} className="overflow-hidden border-none shadow-lg hover:shadow-xl transition-shadow">
-              <div className="h-48 bg-gradient-to-br from-violet-100 to-pink-100 relative">
+              {/* <div className="h-48 bg-gradient-to-br from-violet-100 to-pink-100 relative">
                 <div className="absolute inset-0 flex items-center justify-center">
                   <Image
                     src={farmer.image || "/placeholder.svg"}
@@ -169,7 +169,7 @@ export default function FarmersPage() {
                     className="rounded-full border-4 border-white"
                   />
                 </div>
-              </div>
+              </div> */}
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-xl font-bold text-violet-900">{farmer.name}</h3>

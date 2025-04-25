@@ -89,7 +89,7 @@ export default function Navbar() {
 
           <div className="hidden lg:flex items-center gap-2">
             <WalletConnect variant="outline" />
-
+                
             <Button asChild className="bg-violet-600 hover:bg-violet-700">
               <Link href="/register">Register</Link>
             </Button>

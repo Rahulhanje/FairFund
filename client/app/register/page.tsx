@@ -10,10 +10,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { registerDonor, registerFarmer, isWalletConnected } from "@/lib/blockchain"
-import { Leaf, Wallet } from "lucide-react"
+import { registerDonor, registerFarmer, isWalletConnected, isDonorRegistered, isFarmerRegistered } from "@/lib/blockchain"
+import { Leaf, Wallet, CheckCircle2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import WalletConnect from "@/components/wallet-connect"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export default function RegisterPage() {
   const searchParams = useSearchParams()
@@ -22,6 +23,12 @@ export default function RegisterPage() {
   const [isConnected, setIsConnected] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
+
+  // Registration status
+  const [donorRegistered, setDonorRegistered] = useState(false)
+  const [farmerRegistered, setFarmerRegistered] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("")
+  const [walletAddress, setWalletAddress] = useState("")
 
   // Donor form state
   const [donorForm, setDonorForm] = useState({
@@ -36,61 +43,274 @@ export default function RegisterPage() {
     farmType: "",
   })
 
+  // Check registration status when wallet connects or tab changes
+  const checkRegistrationStatus = async () => {
+    if (!isConnected) return;
+    
+    try {
+      // Check donor registration status
+      if (activeTab === "donor") {
+        const isDonor = await isDonorRegistered(walletAddress);
+        setDonorRegistered(isDonor);
+        if (isDonor) {
+          setErrorMessage("You are already registered as a donor.");
+        }
+      } 
+      // Check farmer registration status
+      else if (activeTab === "farmer") {
+        const isFarmer = await isFarmerRegistered(walletAddress);
+        setFarmerRegistered(isFarmer);
+        if (isFarmer) {
+          setErrorMessage("You are already registered as a farmer.");
+        }
+      }
+    } catch (error) {
+      console.error("Error checking registration status:", error);
+    }
+  };
+
   useEffect(() => {
     const checkWalletConnection = async () => {
-      const connected = await isWalletConnected()
-      setIsConnected(connected)
+      try {
+        const connected = await isWalletConnected();
+        setIsConnected(connected);
+        
+        if (connected) {
+          // Get the wallet address
+          const provider = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          const address = provider[0];
+          setWalletAddress(address);
+        }
+      } catch (error) {
+        console.error("Wallet connection error:", error);
+      }
+    };
+
+    checkWalletConnection();
+  }, []);
+
+  useEffect(() => {
+    if (isConnected && walletAddress) {
+      checkRegistrationStatus();
     }
+  }, [isConnected, walletAddress, activeTab]);
 
-    checkWalletConnection()
-  }, [])
-
-  const handleWalletConnect = (address: string) => {
-    setIsConnected(true)
+  const handleWalletConnect = async (address: string) => {
+    setIsConnected(true);
+    setWalletAddress(address);
+    
     toast({
       title: "Wallet Connected",
       description: "Your wallet has been connected successfully.",
-    })
+    });
+    
+    await checkRegistrationStatus();
   }
 
   const handleDonorSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
+    setErrorMessage("");
+    
     try {
-      await registerDonor(donorForm.name, donorForm.description)
-      toast({
-        title: "Registration Successful",
-        description: "You have been registered as a donor.",
-      })
-    } catch (error) {
-      toast({
-        title: "Registration Failed",
-        description: "Failed to register as donor. Please try again.",
-        variant: "destructive",
-      })
+      // First check if already registered to avoid the transaction error
+      const alreadyRegistered = await isDonorRegistered(walletAddress);
+      
+      if (alreadyRegistered) {
+        setDonorRegistered(true);
+        setErrorMessage("You are already registered as a donor.");
+        toast({
+          title: "Already Registered",
+          description: "You are already registered as a donor.",
+        });
+      } else {
+        // Proceed with registration
+        await registerDonor(donorForm.name, donorForm.description);
+        setDonorRegistered(true);
+        toast({
+          title: "Registration Successful",
+          description: "You have been registered as a donor.",
+        });
+      }
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      
+      // Check for "already registered" in the error
+      if (error.toString().includes("Donor already registered")) {
+        setDonorRegistered(true);
+        setErrorMessage("You are already registered as a donor.");
+        toast({
+          title: "Already Registered",
+          description: "You are already registered as a donor.",
+        });
+      } else {
+        setErrorMessage("Failed to register as donor. Please try again.");
+        toast({
+          title: "Registration Failed",
+          description: "Failed to register as donor. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
   const handleFarmerSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
+    setErrorMessage("");
+    
     try {
-      await registerFarmer(farmerForm.name, farmerForm.location, farmerForm.farmType)
-      toast({
-        title: "Registration Successful",
-        description: "You have been registered as a farmer.",
-      })
-    } catch (error) {
-      toast({
-        title: "Registration Failed",
-        description: "Failed to register as farmer. Please try again.",
-        variant: "destructive",
-      })
+      // First check if already registered to avoid the transaction error
+      const alreadyRegistered = await isFarmerRegistered(walletAddress);
+      
+      if (alreadyRegistered) {
+        setFarmerRegistered(true);
+        setErrorMessage("You are already registered as a farmer.");
+        toast({
+          title: "Already Registered",
+          description: "You are already registered as a farmer.",
+        });
+      } else {
+        // Proceed with registration
+        await registerFarmer(farmerForm.name, farmerForm.location, farmerForm.farmType);
+        setFarmerRegistered(true);
+        toast({
+          title: "Registration Successful",
+          description: "You have been registered as a farmer.",
+        });
+      }
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      
+      // Check for "already registered" in the error
+      if (error.toString().includes("Farmer already registered")) {
+        setFarmerRegistered(true);
+        setErrorMessage("You are already registered as a farmer.");
+        toast({
+          title: "Already Registered",
+          description: "You are already registered as a farmer.",
+        });
+      } else {
+        setErrorMessage("Failed to register as farmer. Please try again.");
+        toast({
+          title: "Registration Failed",
+          description: "Failed to register as farmer. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
+  }
+
+  const renderDonorContent = () => {
+    if (donorRegistered) {
+      return (
+        <div className="text-center py-6">
+          <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-green-700 mb-2">Registration Complete</h3>
+          <p className="text-gray-600">You are registered as a donor in FairFund.</p>
+        </div>
+      )
+    }
+
+    return (
+      <form onSubmit={handleDonorSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="donor-name">Organization Name</Label>
+          <Input
+            id="donor-name"
+            placeholder="Enter your organization name"
+            value={donorForm.name}
+            onChange={(e) => setDonorForm({ ...donorForm, name: e.target.value })}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="donor-description">Description</Label>
+          <Textarea
+            id="donor-description"
+            placeholder="Describe your organization and mission"
+            value={donorForm.description}
+            onChange={(e) => setDonorForm({ ...donorForm, description: e.target.value })}
+            required
+            rows={4}
+          />
+        </div>
+
+        {errorMessage && (
+          <Alert className={errorMessage.includes("already") ? "bg-blue-50 border-blue-200 text-blue-800" : "bg-red-50 border-red-200 text-red-800"}>
+            <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
+        )}
+
+        <Button type="submit" className="w-full bg-violet-600 hover:bg-violet-700" disabled={isLoading}>
+          {isLoading ? "Registering..." : "Register as Donor"}
+        </Button>
+      </form>
+    )
+  }
+
+  const renderFarmerContent = () => {
+    if (farmerRegistered) {
+      return (
+        <div className="text-center py-6">
+          <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-green-700 mb-2">Registration Complete</h3>
+          <p className="text-gray-600">You are registered as a farmer in FairFund.</p>
+        </div>
+      )
+    }
+
+    return (
+      <form onSubmit={handleFarmerSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="farmer-name">Full Name</Label>
+          <Input
+            id="farmer-name"
+            placeholder="Enter your full name"
+            value={farmerForm.name}
+            onChange={(e) => setFarmerForm({ ...farmerForm, name: e.target.value })}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="farmer-location">Location</Label>
+          <Input
+            id="farmer-location"
+            placeholder="Enter your farm location"
+            value={farmerForm.location}
+            onChange={(e) => setFarmerForm({ ...farmerForm, location: e.target.value })}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="farmer-type">Farm Type</Label>
+          <Input
+            id="farmer-type"
+            placeholder="E.g., Organic, Traditional, etc."
+            value={farmerForm.farmType}
+            onChange={(e) => setFarmerForm({ ...farmerForm, farmType: e.target.value })}
+            required
+          />
+        </div>
+
+        {errorMessage && (
+          <Alert className={errorMessage.includes("already") ? "bg-blue-50 border-blue-200 text-blue-800" : "bg-red-50 border-red-200 text-red-800"}>
+            <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
+        )}
+
+        <Button type="submit" className="w-full bg-pink-600 hover:bg-pink-700" disabled={isLoading}>
+          {isLoading ? "Registering..." : "Register as Farmer"}
+        </Button>
+      </form>
+    )
   }
 
   return (
@@ -109,7 +329,11 @@ export default function RegisterPage() {
             </CardContent>
           </Card>
         ) : (
-          <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
+          <Tabs defaultValue={activeTab} onValueChange={(value) => {
+            setActiveTab(value);
+            setErrorMessage("");
+            checkRegistrationStatus();
+          }}>
             <TabsList className="grid w-full grid-cols-2 mb-8">
               <TabsTrigger
                 value="donor"
@@ -131,34 +355,7 @@ export default function RegisterPage() {
                   <CardDescription>Fill in your details to register as a donor on FairFund.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleDonorSubmit} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="donor-name">Organization Name</Label>
-                      <Input
-                        id="donor-name"
-                        placeholder="Enter your organization name"
-                        value={donorForm.name}
-                        onChange={(e) => setDonorForm({ ...donorForm, name: e.target.value })}
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="donor-description">Description</Label>
-                      <Textarea
-                        id="donor-description"
-                        placeholder="Describe your organization and mission"
-                        value={donorForm.description}
-                        onChange={(e) => setDonorForm({ ...donorForm, description: e.target.value })}
-                        required
-                        rows={4}
-                      />
-                    </div>
-
-                    <Button type="submit" className="w-full bg-violet-600 hover:bg-violet-700" disabled={isLoading}>
-                      {isLoading ? "Registering..." : "Register as Donor"}
-                    </Button>
-                  </form>
+                  {renderDonorContent()}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -170,44 +367,7 @@ export default function RegisterPage() {
                   <CardDescription>Fill in your details to register as a farmer on FairFund.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleFarmerSubmit} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="farmer-name">Full Name</Label>
-                      <Input
-                        id="farmer-name"
-                        placeholder="Enter your full name"
-                        value={farmerForm.name}
-                        onChange={(e) => setFarmerForm({ ...farmerForm, name: e.target.value })}
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="farmer-location">Location</Label>
-                      <Input
-                        id="farmer-location"
-                        placeholder="Enter your farm location"
-                        value={farmerForm.location}
-                        onChange={(e) => setFarmerForm({ ...farmerForm, location: e.target.value })}
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="farmer-type">Farm Type</Label>
-                      <Input
-                        id="farmer-type"
-                        placeholder="E.g., Organic, Traditional, etc."
-                        value={farmerForm.farmType}
-                        onChange={(e) => setFarmerForm({ ...farmerForm, farmType: e.target.value })}
-                        required
-                      />
-                    </div>
-
-                    <Button type="submit" className="w-full bg-pink-600 hover:bg-pink-700" disabled={isLoading}>
-                      {isLoading ? "Registering..." : "Register as Farmer"}
-                    </Button>
-                  </form>
+                  {renderFarmerContent()}
                 </CardContent>
               </Card>
             </TabsContent>

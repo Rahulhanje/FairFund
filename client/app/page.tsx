@@ -4,6 +4,7 @@ import { ArrowRight, Leaf, Shield, Users, Wallet } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import StatsCounter from "@/components/stats-counter"
+import FarmerList from "./demo/page"
 
 export default function Home() {
   return (
@@ -182,6 +183,7 @@ export default function Home() {
             </div>
           </div>
         </div>
+        <FarmerList/>
       </section>
     </div>
   )

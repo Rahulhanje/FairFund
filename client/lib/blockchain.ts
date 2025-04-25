@@ -1,277 +1,931 @@
-import { ethers } from "ethers";
+import { ethers, formatEther } from "ethers";
 
-// ABI for the FairFund smart contract
-const contractABI = [
-  {
-    "inputs": [],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "donorAddress",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "name",
-        "type": "string"
-      }
-    ],
-    "name": "DonorRegistered",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "donorAddress",
-        "type": "address"
-      }
-    ],
-    "name": "DonorVerified",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "farmerAddress",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "name",
-        "type": "string"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "location",
-        "type": "string"
-      }
-    ],
-    "name": "FarmerRegistered",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "farmerAddress",
-        "type": "address"
-      }
-    ],
-    "name": "FarmerVerified",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "disbursementId",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "farmer",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "FundsClaimed",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "disbursementId",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "donor",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "farmer",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "FundsDisbursed",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "donorAddress",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "newScore",
-        "type": "uint256"
-      }
-    ],
-    "name": "ReputationUpdated",
-    "type": "event"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_disbursementId",
-        "type": "uint256"
-      }
-    ],
-    "name": "claimFunds",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_farmerAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "string",
-        "name": "_purpose",
-        "type": "string"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_claimDeadlineDays",
-        "type": "uint256"
-      }
-    ],
-    "name": "createDisbursement",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "disbursementIdCounter",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "disbursements",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "id",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "donor",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "farmer",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "timestamp",
-        "type": "uint256"
-      },
-      {
-        "internalType": "string",
-        "name": "purpose",
-        "type": "string"
-      },
-      {
-        "internalType": "bool",
-        "name": "claimed",
-        "type": "bool"
-      },
-      {
-        "internalType": "uint256",
-        "name": "claimDeadline",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "owner",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  }
-];
 
+
+const contractABI =  [
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "donorAddress",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			}
+		],
+		"name": "DonorRegistered",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "donorAddress",
+				"type": "address"
+			}
+		],
+		"name": "DonorVerified",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "farmerAddress",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "location",
+				"type": "string"
+			}
+		],
+		"name": "FarmerRegistered",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "farmerAddress",
+				"type": "address"
+			}
+		],
+		"name": "FarmerVerified",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "disbursementId",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "farmer",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "FundsClaimed",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "disbursementId",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "donor",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "farmer",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "FundsDisbursed",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "donorAddress",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "newScore",
+				"type": "uint256"
+			}
+		],
+		"name": "ReputationUpdated",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_disbursementId",
+				"type": "uint256"
+			}
+		],
+		"name": "claimFunds",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_farmerAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "_purpose",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_claimDeadlineDays",
+				"type": "uint256"
+			}
+		],
+		"name": "createDisbursement",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "disbursementIdCounter",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "disbursements",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "donor",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "farmer",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "timestamp",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "purpose",
+				"type": "string"
+			},
+			{
+				"internalType": "bool",
+				"name": "claimed",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "claimDeadline",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "donorAddresses",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "donorToDisbursements",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "donors",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "description",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "totalDonated",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "successfulDisbursements",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "isVerified",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "reputationScore",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "farmerAddresses",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "farmerToDisbursements",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "farmers",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "location",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "farmType",
+				"type": "string"
+			},
+			{
+				"internalType": "bool",
+				"name": "isVerified",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "totalReceived",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "lastDisbursementDate",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getAllDonors",
+		"outputs": [
+			{
+				"internalType": "address[]",
+				"name": "addresses",
+				"type": "address[]"
+			},
+			{
+				"internalType": "string[]",
+				"name": "names",
+				"type": "string[]"
+			},
+			{
+				"internalType": "string[]",
+				"name": "descriptions",
+				"type": "string[]"
+			},
+			{
+				"internalType": "bool[]",
+				"name": "isVerified",
+				"type": "bool[]"
+			},
+			{
+				"internalType": "uint256[]",
+				"name": "totalDonated",
+				"type": "uint256[]"
+			},
+			{
+				"internalType": "uint256[]",
+				"name": "successfulDisbursements",
+				"type": "uint256[]"
+			},
+			{
+				"internalType": "uint256[]",
+				"name": "reputationScores",
+				"type": "uint256[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getAllFarmers",
+		"outputs": [
+			{
+				"internalType": "address[]",
+				"name": "addresses",
+				"type": "address[]"
+			},
+			{
+				"internalType": "string[]",
+				"name": "names",
+				"type": "string[]"
+			},
+			{
+				"internalType": "string[]",
+				"name": "locations",
+				"type": "string[]"
+			},
+			{
+				"internalType": "string[]",
+				"name": "farmTypes",
+				"type": "string[]"
+			},
+			{
+				"internalType": "bool[]",
+				"name": "isVerified",
+				"type": "bool[]"
+			},
+			{
+				"internalType": "uint256[]",
+				"name": "totalReceived",
+				"type": "uint256[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getContractStats",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "_totalDonors",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_totalBeneficiaries",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_totalFundsDistributed",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_disbursementId",
+				"type": "uint256"
+			}
+		],
+		"name": "getDisbursementDetails",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "donor",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "farmer",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "timestamp",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "purpose",
+				"type": "string"
+			},
+			{
+				"internalType": "bool",
+				"name": "claimed",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "claimDeadline",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_donorAddress",
+				"type": "address"
+			}
+		],
+		"name": "getDonorDisbursements",
+		"outputs": [
+			{
+				"internalType": "uint256[]",
+				"name": "",
+				"type": "uint256[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_donorAddress",
+				"type": "address"
+			}
+		],
+		"name": "getDonorStats",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "description",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "totalDonated",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "successfulDisbursements",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "isVerified",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "reputationScore",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_farmerAddress",
+				"type": "address"
+			}
+		],
+		"name": "getFarmerDisbursements",
+		"outputs": [
+			{
+				"internalType": "uint256[]",
+				"name": "",
+				"type": "uint256[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_farmerAddress",
+				"type": "address"
+			}
+		],
+		"name": "getFarmerStats",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "location",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "farmType",
+				"type": "string"
+			},
+			{
+				"internalType": "bool",
+				"name": "isVerified",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "totalReceived",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "lastDisbursementDate",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_address",
+				"type": "address"
+			}
+		],
+		"name": "isDonorRegistered",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_address",
+				"type": "address"
+			}
+		],
+		"name": "isFarmerRegistered",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_disbursementId",
+				"type": "uint256"
+			}
+		],
+		"name": "reclaimExpiredFunds",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_name",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_description",
+				"type": "string"
+			}
+		],
+		"name": "registerDonor",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_name",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_location",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_farmType",
+				"type": "string"
+			}
+		],
+		"name": "registerFarmer",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "registeredDonors",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "registeredFarmers",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "totalBeneficiaries",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "totalDonors",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "totalFundsDistributed",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_donorAddress",
+				"type": "address"
+			}
+		],
+		"name": "verifyDonor",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_farmerAddress",
+				"type": "address"
+			}
+		],
+		"name": "verifyFarmer",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+]
 // Contract address - this would be the actual deployed contract address
-const contractAddress = "0x45b9c0F889Fe2Bf137d9432Fd5c5D409b1B693b6";
+// const contractAddress = "0x45b9c0F889Fe2Bf137d9432Fd5c5D409b1B693b6";
+const contractAddress = "0xDEe41E6Be234f3bFdF7123054B02A301B57f8124";
 
 // Global variables to store provider, signer, contract, and account
 let provider: ethers.BrowserProvider | null = null;
@@ -404,7 +1058,7 @@ export const isAccountOwner = (): boolean => {
 }
 
 // Check if user is registered as donor
-export const isRegisteredDonor = async (address: string): Promise<boolean> => {
+export const isDonorRegistered = async (address: string): Promise<boolean> => {
   if (!contract) await initializeEthers().catch(() => null)
   try {
     return await contract?.registeredDonors(address)
@@ -416,7 +1070,7 @@ export const isRegisteredDonor = async (address: string): Promise<boolean> => {
 }
 
 // Check if user is registered as farmer
-export const isRegisteredFarmer = async (address: string): Promise<boolean> => {
+export const isFarmerRegistered = async (address: string): Promise<boolean> => {
   if (!contract) await initializeEthers().catch(() => null)
   try {
     return await contract?.registeredFarmers(address)
@@ -444,7 +1098,10 @@ export const registerDonor = async (name: string, description: string): Promise<
 export const registerFarmer = async (name: string, location: string, farmType: string): Promise<void> => {
   if (!contract) await initializeEthers()
   try {
-    const tx = await contract?.registerFarmer(name, location, farmType)
+    if (!contract) {
+      throw new Error("Contract is not initialized. Please connect wallet first.");
+    }
+    const tx = await contract.registerFarmer(name, location, farmType);
     await tx.wait()
     console.log("Registered farmer:", { name, location, farmType })
   } catch (error) {
@@ -461,7 +1118,7 @@ export const getContractStats = async (): Promise<any> => {
     return {
       totalDonors: stats?._totalDonors.toNumber() || 0,
       totalBeneficiaries: stats?._totalBeneficiaries.toNumber() || 0,
-      totalFundsDistributed: Number.parseFloat(ethers.utils.formatEther(stats?._totalFundsDistributed || 0)),
+      totalFundsDistributed: Number.parseFloat(ethers.formatEther(stats?._totalFundsDistributed || 0)),
     }
   } catch (error) {
     console.error("Error getting contract stats:", error)
@@ -482,7 +1139,7 @@ export const getDonorStats = async (address: string): Promise<any> => {
     return {
       name: stats?.name || "",
       description: stats?.description || "",
-      totalDonated: Number.parseFloat(ethers.utils.formatEther(stats?.totalDonated || 0)),
+      totalDonated: Number.parseFloat(ethers.formatEther(stats?.totalDonated || 0)),
       successfulDisbursements: stats?.successfulDisbursements.toNumber() || 0,
       isVerified: stats?.isVerified || false,
       reputationScore: stats?.reputationScore.toNumber() || 0,
@@ -511,7 +1168,7 @@ export const getFarmerStats = async (address: string): Promise<any> => {
       location: stats?.location || "",
       farmType: stats?.farmType || "",
       isVerified: stats?.isVerified || false,
-      totalReceived: Number.parseFloat(ethers.utils.formatEther(stats?.totalReceived || 0)),
+      totalReceived: Number.parseFloat(ethers.formatEther(stats?.totalReceived || 0)),
       lastDisbursementDate: stats?.lastDisbursementDate.toNumber() || 0,
     }
   } catch (error) {
@@ -563,7 +1220,7 @@ export const getDisbursementDetails = async (id: number): Promise<any> => {
       id: details?.id.toNumber(),
       donor: details?.donor,
       farmer: details?.farmer,
-      amount: Number.parseFloat(ethers.utils.formatEther(details?.amount || 0)),
+      amount: Number.parseFloat(ethers.formatEther(details?.amount || 0)),
       timestamp: details?.timestamp.toNumber(),
       purpose: details?.purpose,
       claimed: details?.claimed,
@@ -620,7 +1277,7 @@ export const createDisbursement = async (
 ): Promise<void> => {
   if (!contract) await initializeEthers()
   try {
-    const amountWei = ethers.utils.parseEther(amount.toString())
+    const amountWei = ethers.parseEther(amount.toString())
     const tx = await contract?.createDisbursement(farmerAddress, purpose, claimDeadlineDays, {
       value: amountWei,
     })
@@ -631,7 +1288,6 @@ export const createDisbursement = async (
     throw error
   }
 }
-
 // Claim funds
 export const claimFunds = async (disbursementId: number): Promise<void> => {
   if (!contract) await initializeEthers()
@@ -686,17 +1342,36 @@ export const verifyDonor = async (donorAddress: string): Promise<void> => {
 
 // Get list of farmers
 export const getFarmers = async (): Promise<any[]> => {
-  // This would typically query events from the contract or use a subgraph
-  // For demo purposes, return mock data
-  return [
-    { name: "John Smith", location: "Kenya", address: "0x123", farmType: "Organic Vegetables", isVerified: true },
-    { name: "Maria Garcia", location: "Colombia", address: "0x456", farmType: "Coffee", isVerified: true },
-    { name: "Raj Patel", location: "India", address: "0x789", farmType: "Cotton & Spices", isVerified: false },
-    { name: "Amara Okafor", location: "Nigeria", address: "0xabc", farmType: "Cassava & Yams", isVerified: true },
-    { name: "Luis Mendoza", location: "Mexico", address: "0xdef", farmType: "Corn & Beans", isVerified: false },
-    { name: "Fatima Al-Hassan", location: "Morocco", address: "0xghi", farmType: "Olives & Dates", isVerified: true },
-  ]
-}
+	try {
+	  if (!contract) await initializeEthers();
+  
+	  const result = await contract!.getAllFarmers();
+  
+	  if (!Array.isArray(result) || result.length < 6) {
+		throw new Error("Unexpected return format from getAllFarmers");
+	  }
+  
+	  const [addresses, names, locations, farmTypes, isVerified, totalReceived] = result;
+  
+	  const farmers = addresses.map((address: string, index: number) => ({
+		address,
+		name: names[index],
+		location: locations[index],
+		farmType: farmTypes[index],
+		isVerified: isVerified[index],
+		totalReceived: ethers.formatEther(totalReceived[index].toString()) // Ensure BigInt to string
+	  }));
+  
+	  return farmers;
+	} catch (error) {
+	  console.error("Error fetching farmers:", error);
+	  return [];
+	}
+  };
+  
+  
+
+  
 
 // Get list of donors
 export const getDonors = async (): Promise<any[]> => {
@@ -745,3 +1420,4 @@ export const getDonors = async (): Promise<any[]> => {
     },
   ]
 }
+
