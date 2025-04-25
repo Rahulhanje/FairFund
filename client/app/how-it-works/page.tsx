@@ -1,0 +1,296 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { CheckCircle, Clock, Leaf, Shield, Users, Wallet } from "lucide-react"
+import Link from "next/link"
+import Image from "next/image"
+
+export default function HowItWorksPage() {
+  return (
+    <div className="container mx-auto px-4 py-12">
+      <div className="text-center mb-16">
+        <h1 className="text-4xl font-bold text-violet-900 mb-4">How FairFund Works</h1>
+        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          Our blockchain-powered platform ensures every donation reaches the right farmer with complete transparency and
+          accountability.
+        </p>
+      </div>
+
+      {/* Process Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
+        <Card className="border-none shadow-lg">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center text-xl text-violet-900">
+              <div className="bg-violet-100 w-8 h-8 rounded-full flex items-center justify-center mr-3 text-violet-600">
+                1
+              </div>
+              Registration & Verification
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-600 mb-4">
+              Both donors and farmers register on the platform by providing necessary information. The platform owner
+              verifies their identities to ensure legitimacy and build trust in the ecosystem.
+            </p>
+            <div className="flex items-center text-violet-600 font-medium">
+              <Shield className="h-4 w-4 mr-2" />
+              Ensures trust and accountability
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-none shadow-lg">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center text-xl text-violet-900">
+              <div className="bg-pink-100 w-8 h-8 rounded-full flex items-center justify-center mr-3 text-pink-600">
+                2
+              </div>
+              Disbursement Creation
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-600 mb-4">
+              Verified donors create disbursements by specifying the farmer, purpose, amount, and deadline for claiming
+              funds. The funds are locked in the smart contract until claimed or the deadline passes.
+            </p>
+            <div className="flex items-center text-pink-600 font-medium">
+              <Wallet className="h-4 w-4 mr-2" />
+              Transparent fund allocation
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-none shadow-lg">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center text-xl text-violet-900">
+              <div className="bg-yellow-100 w-8 h-8 rounded-full flex items-center justify-center mr-3 text-yellow-600">
+                3
+              </div>
+              Claiming & Feedback
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-600 mb-4">
+              Farmers claim their funds before the deadline and use them to develop their farms. Successful claims
+              improve donor reputation scores, creating a virtuous cycle of trust and support.
+            </p>
+            <div className="flex items-center text-yellow-600 font-medium">
+              <Leaf className="h-4 w-4 mr-2" />
+              Empowers farmers to grow
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Detailed Explanation */}
+      <div className="mb-20">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-violet-900 mb-4">The FairFund Process</h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            A detailed look at how our platform connects donors with farmers through blockchain technology.
+          </p>
+        </div>
+
+        <div className="space-y-16">
+          {/* Step 1 */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div className="order-2 md:order-1">
+              <h3 className="text-2xl font-bold text-violet-900 mb-4">Registration & Verification</h3>
+              <div className="space-y-4">
+                <div className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 mr-3 flex-shrink-0" />
+                  <p className="text-gray-600">
+                    <span className="font-medium text-gray-900">Donor Registration:</span> Organizations or individuals
+                    register by providing their name, description, and connecting their Ethereum wallet. This creates a
+                    transparent identity on the blockchain.
+                  </p>
+                </div>
+                <div className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 mr-3 flex-shrink-0" />
+                  <p className="text-gray-600">
+                    <span className="font-medium text-gray-900">Farmer Registration:</span> Farmers register by
+                    providing their name, location, farm type, and connecting their Ethereum wallet. This creates a
+                    verifiable profile that donors can review.
+                  </p>
+                </div>
+                <div className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 mr-3 flex-shrink-0" />
+                  <p className="text-gray-600">
+                    <span className="font-medium text-gray-900">Verification Process:</span> The platform owner verifies
+                    both donors and farmers to ensure legitimacy. This adds an extra layer of trust to the ecosystem.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="order-1 md:order-2">
+              <Image
+                src="/placeholder.svg?height=300&width=500&text=Registration Process"
+                alt="Registration Process"
+                width={500}
+                height={300}
+                className="rounded-lg shadow-lg"
+              />
+            </div>
+          </div>
+
+          {/* Step 2 */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div className="md:order-2">
+              <h3 className="text-2xl font-bold text-violet-900 mb-4">Disbursement Creation</h3>
+              <div className="space-y-4">
+                <div className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 mr-3 flex-shrink-0" />
+                  <p className="text-gray-600">
+                    <span className="font-medium text-gray-900">Selecting Recipients:</span> Verified donors browse
+                    through the farmer profiles and select recipients based on their needs, location, and farming
+                    practices.
+                  </p>
+                </div>
+                <div className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 mr-3 flex-shrink-0" />
+                  <p className="text-gray-600">
+                    <span className="font-medium text-gray-900">Creating Disbursements:</span> Donors specify the
+                    amount, purpose, and claim deadline for each disbursement. The funds are locked in the smart
+                    contract.
+                  </p>
+                </div>
+                <div className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 mr-3 flex-shrink-0" />
+                  <p className="text-gray-600">
+                    <span className="font-medium text-gray-900">Transparent Records:</span> All disbursements are
+                    recorded on the blockchain, creating a transparent and immutable record of the transaction.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="md:order-1">
+              <Image
+                src="/placeholder.svg?height=300&width=500&text=Disbursement Process"
+                alt="Disbursement Process"
+                width={500}
+                height={300}
+                className="rounded-lg shadow-lg"
+              />
+            </div>
+          </div>
+
+          {/* Step 3 */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div className="order-2 md:order-1">
+              <h3 className="text-2xl font-bold text-violet-900 mb-4">Claiming & Feedback</h3>
+              <div className="space-y-4">
+                <div className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 mr-3 flex-shrink-0" />
+                  <p className="text-gray-600">
+                    <span className="font-medium text-gray-900">Claim Process:</span> Farmers receive notifications
+                    about available disbursements and can claim them before the deadline through their dashboard.
+                  </p>
+                </div>
+                <div className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 mr-3 flex-shrink-0" />
+                  <p className="text-gray-600">
+                    <span className="font-medium text-gray-900">Reputation System:</span> Successful claims improve
+                    donor reputation scores, creating incentives for continued support and responsible disbursement.
+                  </p>
+                </div>
+                <div className="flex items-start">
+                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 mr-3 flex-shrink-0" />
+                  <p className="text-gray-600">
+                    <span className="font-medium text-gray-900">Expired Claims:</span> If a farmer doesn't claim funds
+                    before the deadline, the donor can reclaim them, ensuring funds aren't locked indefinitely.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="order-1 md:order-2">
+              <Image
+                src="/placeholder.svg?height=300&width=500&text=Claiming Process"
+                alt="Claiming Process"
+                width={500}
+                height={300}
+                className="rounded-lg shadow-lg"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Benefits Section */}
+      <div className="mb-20">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-violet-900 mb-4">Benefits of FairFund</h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Our platform offers unique advantages for both donors and farmers through blockchain technology.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="border-none shadow-lg">
+            <CardContent className="pt-6">
+              <div className="bg-violet-100 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                <Shield className="h-6 w-6 text-violet-600" />
+              </div>
+              <h3 className="font-bold text-lg mb-2 text-violet-900">Transparency</h3>
+              <p className="text-gray-600">
+                All transactions are recorded on the blockchain, creating a transparent and immutable record of fund
+                movement.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-lg">
+            <CardContent className="pt-6">
+              <div className="bg-pink-100 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                <Users className="h-6 w-6 text-pink-600" />
+              </div>
+              <h3 className="font-bold text-lg mb-2 text-violet-900">Direct Connection</h3>
+              <p className="text-gray-600">
+                Donors and farmers connect directly without intermediaries, reducing overhead and increasing impact.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-lg">
+            <CardContent className="pt-6">
+              <div className="bg-yellow-100 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                <Clock className="h-6 w-6 text-yellow-600" />
+              </div>
+              <h3 className="font-bold text-lg mb-2 text-violet-900">Efficiency</h3>
+              <p className="text-gray-600">
+                Smart contracts automate the disbursement and claiming process, reducing administrative overhead.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-lg">
+            <CardContent className="pt-6">
+              <div className="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                <Leaf className="h-6 w-6 text-green-600" />
+              </div>
+              <h3 className="font-bold text-lg mb-2 text-violet-900">Sustainability</h3>
+              <p className="text-gray-600">
+                The platform encourages long-term relationships between donors and farmers, promoting sustainable
+                development.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* CTA Section */}
+      <div className="text-center">
+        <h2 className="text-3xl font-bold text-violet-900 mb-6">Ready to Get Started?</h2>
+        <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
+          Join FairFund today and be part of a transparent ecosystem that empowers small farmers around the world.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Button asChild size="lg" className="bg-violet-600 hover:bg-violet-700">
+            <Link href="/register?type=donor">Register as Donor</Link>
+          </Button>
+          <Button asChild size="lg" variant="outline" className="border-violet-300 text-violet-700 hover:bg-violet-50">
+            <Link href="/register?type=farmer">Register as Farmer</Link>
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
