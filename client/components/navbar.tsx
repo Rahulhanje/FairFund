@@ -1,17 +1,19 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { ThemeToggle } from "@/components/theme-toggle"
 import { Menu } from "lucide-react"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { isWalletConnected, getCurrentAccount, isAccountOwner } from "@/lib/blockchain"
 import WalletConnect from "@/components/wallet-connect"
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
+  const [address, setAddress] = useState<string | null>(null)
+  const [isOwner, setIsOwner] = useState(false)
   const pathname = usePathname()
 
   const routes = [
@@ -20,19 +22,32 @@ export default function Navbar() {
     { name: "Donors", path: "/donors" },
     { name: "How It Works", path: "/how-it-works" },
     { name: "About", path: "/about" },
+    ...(isOwner ? [{ name: "Admin", path: "/verification" }] : []),
   ]
 
   const isActive = (path: string) => pathname === path
 
+  useEffect(() => {
+    const checkWallet = async () => {
+      const connected = await isWalletConnected()
+      if (connected) {
+        const account = getCurrentAccount()
+        const owner = isAccountOwner()
+        setAddress(account)
+        setIsOwner(owner)
+      }
+    }
+    checkWallet()
+  }, [])
+
   return (
-<header className="sticky top-0 z-50 w-full border-b border-white/20 bg-white/70 backdrop-blur-md supports-[backdrop-filter]:bg-white/70 shadow-sm">
-<div className="container flex h-16 items-center justify-between">
+    <header className="sticky top-0 z-50 w-full border-b border-white/20 bg-white/70 backdrop-blur-md supports-[backdrop-filter]:bg-white/70 shadow-sm">
+      <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild className="lg:hidden">
               <Button variant="ghost" size="icon" className="mr-2">
                 <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle menu</span>
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-[300px] sm:w-[400px]">
@@ -85,11 +100,18 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2">
-          {/* <ThemeToggle /> */}
-
           <div className="hidden lg:flex items-center gap-2">
-            <WalletConnect variant="outline" />
-                
+            <WalletConnect
+              variant="outline"
+              onConnect={(addr) => {
+                setAddress(addr)
+                setIsOwner(isAccountOwner())
+              }}
+              onDisconnect={() => {
+                setAddress(null)
+                setIsOwner(false)
+              }}
+            />
             <Button asChild className="bg-violet-600 hover:bg-violet-700">
               <Link href="/register">Register</Link>
             </Button>

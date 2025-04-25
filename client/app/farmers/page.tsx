@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { CheckCircle, Leaf, MapPin, Search, SlidersHorizontal } from "lucide-react"
+import { CheckCircle, Leaf, MapPin, Search, SlidersHorizontal, XCircle } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { Input } from "@/components/ui/input"
@@ -34,12 +34,10 @@ export default function FarmersPage() {
         const enhancedFarmers = farmersList.map((farmer, index) => ({
           ...farmer,
           id: index + 1,
-          totalReceived: (Math.random() * 5).toFixed(2),
-          image: `/placeholder.svg?height=200&width=200&text=${farmer.name.substring(0, 2)}`,
           story: `${farmer.name} is a dedicated farmer specializing in ${
             farmer.farmType
           }. With support from FairFund, ${
-            Math.random() > 0.5 ? "he" : "she"
+            farmer.name
           } has been able to implement sustainable farming practices and increase crop yield.`,
         }))
         setFarmers(enhancedFarmers)
@@ -173,10 +171,15 @@ export default function FarmersPage() {
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-xl font-bold text-violet-900">{farmer.name}</h3>
-                  {farmer.isVerified && (
+                  {farmer.isVerified ? (
                     <Badge className="bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-900 dark:text-green-100">
                       <CheckCircle className="h-3 w-3 mr-1" />
                       Verified
+                    </Badge>
+                  ):(
+                    <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100 dark:bg-yellow-900 dark:text-yellow-100">
+                      <XCircle className="h-3 w-3 mr-1" />
+                      Not Verified
                     </Badge>
                   )}
                 </div>

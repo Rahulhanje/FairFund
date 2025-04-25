@@ -1340,6 +1340,7 @@ export const verifyDonor = async (donorAddress: string): Promise<void> => {
   }
 }
 
+
 // Get list of farmers
 export const getFarmers = async (): Promise<any[]> => {
 	try {
@@ -1375,49 +1376,35 @@ export const getFarmers = async (): Promise<any[]> => {
 
 // Get list of donors
 export const getDonors = async (): Promise<any[]> => {
-  // This would typically query events from the contract or use a subgraph
-  // For demo purposes, return mock data
-  return [
-    {
-      name: "Acme Foundation",
-      description: "Supporting sustainable agriculture worldwide",
-      address: "0xabc",
-      totalDonated: 5.75,
-      reputationScore: 85,
-      isVerified: true,
-    },
-    {
-      name: "Green Future Initiative",
-      description: "Promoting eco-friendly farming practices",
-      address: "0xdef",
-      totalDonated: 3.2,
-      reputationScore: 92,
-      isVerified: true,
-    },
-    {
-      name: "Global Harvest Fund",
-      description: "Investing in small-scale farmers across developing nations",
-      address: "0xghi",
-      totalDonated: 8.1,
-      reputationScore: 78,
-      isVerified: true,
-    },
-    {
-      name: "AgriTech Ventures",
-      description: "Supporting technological innovation in agriculture",
-      address: "0xjkl",
-      totalDonated: 2.5,
-      reputationScore: 70,
-      isVerified: false,
-    },
-    {
-      name: "Sustainable Futures",
-      description: "Focused on long-term agricultural sustainability",
-      address: "0xmno",
-      totalDonated: 4.3,
-      reputationScore: 88,
-      isVerified: true,
-    },
-  ]
-}
+  try {
+    if (!contract) await initializeEthers();
 
+    const result = await contract!.getAllDonors();
+
+    // Match the exact order from Solidity
+    const [
+      addresses,
+      names,
+      descriptions,
+      isVerified,
+      totalDonated,
+      successfulDisbursements,
+      reputationScores
+    ] = result;
+
+    const donors = addresses.map((address: string, index: number) => ({
+      address,
+      name: names[index],
+      description: descriptions[index],
+      isVerified: isVerified[index],
+      totalDonated: ethers.formatEther(totalDonated[index]),
+      successfulDisbursements: Number(successfulDisbursements[index]),
+      reputationScore: Number(reputationScores[index])
+    }));
+
+    return donors;
+  } catch (error) {
+    console.error("Error fetching donors:", error);
+    return [];
+  }
+};
