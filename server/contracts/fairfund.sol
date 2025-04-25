@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 /**
  * @title FairFund
- * @dev A transparent aid distribution system for small farmers
+ * @dev A transparent aid distribution system for small farmers (Farmer-initiated model)
  */
 contract FairFund {
     address public owner;
@@ -29,34 +29,31 @@ contract FairFund {
         uint256 lastDisbursementDate;
     }
 
-    struct Disbursement {
+    struct AidRequest {
         uint256 id;
-        address donor;
         address farmer;
-        uint256 amount;
-        uint256 timestamp;
+        string name;
         string purpose;
-        bool claimed;
-        uint256 claimDeadline;
+        uint256 amountRequested;
+        uint256 amountFunded;
+        uint256 timestamp;
+        bool fulfilled;
     }
 
     mapping(address => Donor) public donors;
     mapping(address => Farmer) public farmers;
-    mapping(uint256 => Disbursement) public disbursements;
     mapping(address => bool) public registeredDonors;
     mapping(address => bool) public registeredFarmers;
-    mapping(address => uint256[]) public donorToDisbursements;
-    mapping(address => uint256[]) public farmerToDisbursements;
 
     address[] public donorAddresses;
     address[] public farmerAddresses;
 
-    uint256 public disbursementIdCounter;
+    AidRequest[] public aidRequests;
 
     event DonorRegistered(address indexed donorAddress, string name);
     event FarmerRegistered(address indexed farmerAddress, string name, string location);
-    event FundsDisbursed(uint256 indexed disbursementId, address indexed donor, address indexed farmer, uint256 amount);
-    event FundsClaimed(uint256 indexed disbursementId, address indexed farmer, uint256 amount);
+    event AidRequested(uint256 indexed requestId, address indexed farmer, string name, string purpose, uint256 amount);
+    event AidFunded(uint256 indexed requestId, address indexed donor, address indexed farmer, uint256 amount);
     event DonorVerified(address indexed donorAddress);
     event FarmerVerified(address indexed farmerAddress);
     event ReputationUpdated(address indexed donorAddress, uint256 newScore);
@@ -78,7 +75,6 @@ contract FairFund {
 
     constructor() {
         owner = msg.sender;
-        disbursementIdCounter = 1;
     }
 
     function registerDonor(string memory _name, string memory _description) external {
@@ -131,80 +127,55 @@ contract FairFund {
         emit FarmerVerified(_farmerAddress);
     }
 
-    function createDisbursement(
-        address _farmerAddress, 
-        string memory _purpose,
-        uint256 _claimDeadlineDays
-    ) external payable onlyRegisteredDonor {
-        require(msg.value > 0, "Amount must be greater than 0");
-        require(registeredFarmers[_farmerAddress], "Farmer not registered");
-        require(donors[msg.sender].isVerified, "Donor must be verified");
+    function requestAid(string memory _name, string memory _purpose, uint256 _amountRequested) external onlyRegisteredFarmer {
+        require(_amountRequested > 0, "Requested amount must be greater than zero");
 
-        uint256 claimDeadline = block.timestamp + (_claimDeadlineDays * 1 days);
-
-        disbursements[disbursementIdCounter] = Disbursement({
-            id: disbursementIdCounter,
-            donor: msg.sender,
-            farmer: _farmerAddress,
-            amount: msg.value,
-            timestamp: block.timestamp,
+        aidRequests.push(AidRequest({
+            id: aidRequests.length,
+            farmer: msg.sender,
+            name: _name,
             purpose: _purpose,
-            claimed: false,
-            claimDeadline: claimDeadline
-        });
+            amountRequested: _amountRequested,
+            amountFunded: 0,
+            timestamp: block.timestamp,
+            fulfilled: false
+        }));
 
-        donorToDisbursements[msg.sender].push(disbursementIdCounter);
-        farmerToDisbursements[_farmerAddress].push(disbursementIdCounter);
+        emit AidRequested(aidRequests.length - 1, msg.sender, _name, _purpose, _amountRequested);
+    }
+
+    function fundAidRequest(uint256 _requestId) external payable onlyRegisteredDonor {
+        require(_requestId < aidRequests.length, "Invalid request ID");
+        AidRequest storage request = aidRequests[_requestId];
+        require(!request.fulfilled, "Aid request already fulfilled");
+        require(msg.value > 0, "Must send ETH to fund");
+
+        request.amountFunded += msg.value;
+        if (request.amountFunded >= request.amountRequested) {
+            request.fulfilled = true;
+        }
+
+        farmers[request.farmer].totalReceived += msg.value;
+        farmers[request.farmer].lastDisbursementDate = block.timestamp;
 
         donors[msg.sender].totalDonated += msg.value;
+        donors[msg.sender].successfulDisbursements++;
 
-        emit FundsDisbursed(disbursementIdCounter, msg.sender, _farmerAddress, msg.value);
+        totalFundsDistributed += msg.value;
 
-        disbursementIdCounter++;
-    }
+        updateDonorReputation(msg.sender);
 
-    function claimFunds(uint256 _disbursementId) external onlyRegisteredFarmer {
-        Disbursement storage disbursement = disbursements[_disbursementId];
+        emit AidFunded(_requestId, msg.sender, request.farmer, msg.value);
 
-        require(disbursement.farmer == msg.sender, "Only designated farmer can claim");
-        require(!disbursement.claimed, "Funds already claimed");
-        require(block.timestamp <= disbursement.claimDeadline, "Claim deadline has passed");
-
-        disbursement.claimed = true;
-
-        farmers[msg.sender].totalReceived += disbursement.amount;
-        farmers[msg.sender].lastDisbursementDate = block.timestamp;
-
-        donors[disbursement.donor].successfulDisbursements++;
-        updateDonorReputation(disbursement.donor);
-
-        totalFundsDistributed += disbursement.amount;
-
-        emit FundsClaimed(_disbursementId, msg.sender, disbursement.amount);
-
-        (bool success, ) = payable(msg.sender).call{value: disbursement.amount}("");
-        require(success, "Transfer failed");
-    }
-
-    function reclaimExpiredFunds(uint256 _disbursementId) external {
-        Disbursement storage disbursement = disbursements[_disbursementId];
-
-        require(disbursement.donor == msg.sender, "Only the donor can reclaim");
-        require(!disbursement.claimed, "Funds already claimed");
-        require(block.timestamp > disbursement.claimDeadline, "Claim deadline has not passed");
-
-        disbursement.claimed = true;
-
-        (bool success, ) = payable(msg.sender).call{value: disbursement.amount}("");
+        (bool success, ) = payable(request.farmer).call{value: msg.value}("");
         require(success, "Transfer failed");
     }
 
     function updateDonorReputation(address _donorAddress) internal {
         Donor storage donor = donors[_donorAddress];
-
         if (donor.totalDonated == 0) return;
 
-        uint256 successRate = (donor.successfulDisbursements * 100) / donorToDisbursements[_donorAddress].length;
+        uint256 successRate = (donor.successfulDisbursements * 100) / (donor.successfulDisbursements + 1);
         uint256 timeFactor = 5;
 
         donor.reputationScore = (successRate * 80 + timeFactor * 20) / 100;
@@ -216,35 +187,101 @@ contract FairFund {
         emit ReputationUpdated(_donorAddress, donor.reputationScore);
     }
 
-    function getDonorDisbursements(address _donorAddress) external view returns (uint256[] memory) {
-        return donorToDisbursements[_donorAddress];
-    }
-
-    function getFarmerDisbursements(address _farmerAddress) external view returns (uint256[] memory) {
-        return farmerToDisbursements[_farmerAddress];
-    }
-
-    function getDisbursementDetails(uint256 _disbursementId) external view returns (
-        uint256 id,
-        address donor,
-        address farmer,
-        uint256 amount,
-        uint256 timestamp,
-        string memory purpose,
-        bool claimed,
-        uint256 claimDeadline
+    function getAllAidRequests() external view returns (
+        uint256[] memory ids,
+        address[] memory farmerAddressesList,
+        string[] memory requestNames,
+        string[] memory purposes,
+        uint256[] memory amountsRequested,
+        uint256[] memory amountsFunded,
+        uint256[] memory timestamps,
+        bool[] memory fulfilledStatuses
     ) {
-        Disbursement storage d = disbursements[_disbursementId];
-        return (
-            d.id,
-            d.donor,
-            d.farmer,
-            d.amount,
-            d.timestamp,
-            d.purpose,
-            d.claimed,
-            d.claimDeadline
-        );
+        uint256 length = aidRequests.length;
+
+        ids = new uint256[](length);
+        farmerAddressesList = new address[](length);
+        requestNames = new string[](length);
+        purposes = new string[](length);
+        amountsRequested = new uint256[](length);
+        amountsFunded = new uint256[](length);
+        timestamps = new uint256[](length);
+        fulfilledStatuses = new bool[](length);
+
+        for (uint256 i = 0; i < length; i++) {
+            AidRequest storage a = aidRequests[i];
+            ids[i] = a.id;
+            farmerAddressesList[i] = a.farmer;
+            requestNames[i] = a.name;
+            purposes[i] = a.purpose;
+            amountsRequested[i] = a.amountRequested;
+            amountsFunded[i] = a.amountFunded;
+            timestamps[i] = a.timestamp;
+            fulfilledStatuses[i] = a.fulfilled;
+        }
+    }
+
+    function getAllFarmers() external view returns (
+        address[] memory addresses,
+        string[] memory names,
+        string[] memory locations,
+        string[] memory farmTypes,
+        bool[] memory isVerified,
+        uint256[] memory totalReceived
+    ) {
+        uint256 length = farmerAddresses.length;
+
+        addresses = new address[](length);
+        names = new string[](length);
+        locations = new string[](length);
+        farmTypes = new string[](length);
+        isVerified = new bool[](length);
+        totalReceived = new uint256[](length);
+
+        for (uint256 i = 0; i < length; i++) {
+            address farmerAddr = farmerAddresses[i];
+            Farmer storage f = farmers[farmerAddr];
+
+            addresses[i] = farmerAddr;
+            names[i] = f.name;
+            locations[i] = f.location;
+            farmTypes[i] = f.farmType;
+            isVerified[i] = f.isVerified;
+            totalReceived[i] = f.totalReceived;
+        }
+    }
+
+    function getAllDonors() external view returns (
+        address[] memory addresses,
+        string[] memory names,
+        string[] memory descriptions,
+        bool[] memory isVerified,
+        uint256[] memory totalDonated,
+        uint256[] memory successfulDisbursements,
+        uint256[] memory reputationScores
+    ) {
+        uint256 length = donorAddresses.length;
+
+        addresses = new address[](length);
+        names = new string[](length);
+        descriptions = new string[](length);
+        isVerified = new bool[](length);
+        totalDonated = new uint256[](length);
+        successfulDisbursements = new uint256[](length);
+        reputationScores = new uint256[](length);
+
+        for (uint256 i = 0; i < length; i++) {
+            address donorAddr = donorAddresses[i];
+            Donor storage d = donors[donorAddr];
+
+            addresses[i] = donorAddr;
+            names[i] = d.name;
+            descriptions[i] = d.description;
+            isVerified[i] = d.isVerified;
+            totalDonated[i] = d.totalDonated;
+            successfulDisbursements[i] = d.successfulDisbursements;
+            reputationScores[i] = d.reputationScore;
+        }
     }
 
     function getDonorStats(address _donorAddress) external view returns (
@@ -299,72 +336,5 @@ contract FairFund {
 
     function isFarmerRegistered(address _address) public view returns (bool) {
         return registeredFarmers[_address];
-    }
-
-    function getAllFarmers() external view returns (
-        address[] memory addresses,
-        string[] memory names,
-        string[] memory locations,
-        string[] memory farmTypes,
-        bool[] memory isVerified,
-        uint256[] memory totalReceived
-    ) {
-        uint256 length = farmerAddresses.length;
-
-        addresses = new address[](length);
-        names = new string[](length);
-        locations = new string[](length);
-        farmTypes = new string[](length);
-        isVerified = new bool[](length);
-        totalReceived = new uint256[](length);
-
-        for (uint256 i = 0; i < length; i++) {
-            address farmerAddr = farmerAddresses[i];
-            Farmer storage f = farmers[farmerAddr];
-
-            addresses[i] = farmerAddr;
-            names[i] = f.name;
-            locations[i] = f.location;
-            farmTypes[i] = f.farmType;
-            isVerified[i] = f.isVerified;
-            totalReceived[i] = f.totalReceived;
-        }
-
-        return (addresses, names, locations, farmTypes, isVerified, totalReceived);
-    }
-
-    function getAllDonors() external view returns (
-        address[] memory addresses,
-        string[] memory names,
-        string[] memory descriptions,
-        bool[] memory isVerified,
-        uint256[] memory totalDonated,
-        uint256[] memory successfulDisbursements,
-        uint256[] memory reputationScores
-    ) {
-        uint256 length = donorAddresses.length;
-
-        addresses = new address[](length);
-        names = new string[](length);
-        descriptions = new string[](length);
-        isVerified = new bool[](length);
-        totalDonated = new uint256[](length);
-        successfulDisbursements = new uint256[](length);
-        reputationScores = new uint256[](length);
-
-        for (uint256 i = 0; i < length; i++) {
-            address donorAddr = donorAddresses[i];
-            Donor storage d = donors[donorAddr];
-
-            addresses[i] = donorAddr;
-            names[i] = d.name;
-            descriptions[i] = d.description;
-            isVerified[i] = d.isVerified;
-            totalDonated[i] = d.totalDonated;
-            successfulDisbursements[i] = d.successfulDisbursements;
-            reputationScores[i] = d.reputationScore;
-        }
-
-        return (addresses, names, descriptions, isVerified, totalDonated, successfulDisbursements, reputationScores);
     }
 }

@@ -13,6 +13,74 @@ const contractABI =  [
 		"inputs": [
 			{
 				"indexed": true,
+				"internalType": "uint256",
+				"name": "requestId",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "donor",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "farmer",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "AidFunded",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "requestId",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "farmer",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "purpose",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "AidRequested",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
 				"internalType": "address",
 				"name": "donorAddress",
 				"type": "address"
@@ -83,62 +151,6 @@ const contractABI =  [
 		"inputs": [
 			{
 				"indexed": true,
-				"internalType": "uint256",
-				"name": "disbursementId",
-				"type": "uint256"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "farmer",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			}
-		],
-		"name": "FundsClaimed",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "uint256",
-				"name": "disbursementId",
-				"type": "uint256"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "donor",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "farmer",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			}
-		],
-		"name": "FundsDisbursed",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
 				"internalType": "address",
 				"name": "donorAddress",
 				"type": "address"
@@ -157,60 +169,11 @@ const contractABI =  [
 		"inputs": [
 			{
 				"internalType": "uint256",
-				"name": "_disbursementId",
-				"type": "uint256"
-			}
-		],
-		"name": "claimFunds",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_farmerAddress",
-				"type": "address"
-			},
-			{
-				"internalType": "string",
-				"name": "_purpose",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_claimDeadlineDays",
-				"type": "uint256"
-			}
-		],
-		"name": "createDisbursement",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "disbursementIdCounter",
-		"outputs": [
-			{
-				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
 			}
 		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "disbursements",
+		"name": "aidRequests",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -219,17 +182,27 @@ const contractABI =  [
 			},
 			{
 				"internalType": "address",
-				"name": "donor",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
 				"name": "farmer",
 				"type": "address"
 			},
 			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "purpose",
+				"type": "string"
+			},
+			{
 				"internalType": "uint256",
-				"name": "amount",
+				"name": "amountRequested",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "amountFunded",
 				"type": "uint256"
 			},
 			{
@@ -238,19 +211,9 @@ const contractABI =  [
 				"type": "uint256"
 			},
 			{
-				"internalType": "string",
-				"name": "purpose",
-				"type": "string"
-			},
-			{
 				"internalType": "bool",
-				"name": "claimed",
+				"name": "fulfilled",
 				"type": "bool"
-			},
-			{
-				"internalType": "uint256",
-				"name": "claimDeadline",
-				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -270,30 +233,6 @@ const contractABI =  [
 				"internalType": "address",
 				"name": "",
 				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "donorToDisbursements",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -368,30 +307,6 @@ const contractABI =  [
 				"internalType": "address",
 				"name": "",
 				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "farmerToDisbursements",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
 			}
 		],
 		"name": "farmers",
@@ -425,6 +340,67 @@ const contractABI =  [
 				"internalType": "uint256",
 				"name": "lastDisbursementDate",
 				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_requestId",
+				"type": "uint256"
+			}
+		],
+		"name": "fundAidRequest",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getAllAidRequests",
+		"outputs": [
+			{
+				"internalType": "uint256[]",
+				"name": "ids",
+				"type": "uint256[]"
+			},
+			{
+				"internalType": "address[]",
+				"name": "farmerAddressesList",
+				"type": "address[]"
+			},
+			{
+				"internalType": "string[]",
+				"name": "requestNames",
+				"type": "string[]"
+			},
+			{
+				"internalType": "string[]",
+				"name": "purposes",
+				"type": "string[]"
+			},
+			{
+				"internalType": "uint256[]",
+				"name": "amountsRequested",
+				"type": "uint256[]"
+			},
+			{
+				"internalType": "uint256[]",
+				"name": "amountsFunded",
+				"type": "uint256[]"
+			},
+			{
+				"internalType": "uint256[]",
+				"name": "timestamps",
+				"type": "uint256[]"
+			},
+			{
+				"internalType": "bool[]",
+				"name": "fulfilledStatuses",
+				"type": "bool[]"
 			}
 		],
 		"stateMutability": "view",
@@ -537,79 +513,6 @@ const contractABI =  [
 	{
 		"inputs": [
 			{
-				"internalType": "uint256",
-				"name": "_disbursementId",
-				"type": "uint256"
-			}
-		],
-		"name": "getDisbursementDetails",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "id",
-				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "donor",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "farmer",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "timestamp",
-				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "purpose",
-				"type": "string"
-			},
-			{
-				"internalType": "bool",
-				"name": "claimed",
-				"type": "bool"
-			},
-			{
-				"internalType": "uint256",
-				"name": "claimDeadline",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_donorAddress",
-				"type": "address"
-			}
-		],
-		"name": "getDonorDisbursements",
-		"outputs": [
-			{
-				"internalType": "uint256[]",
-				"name": "",
-				"type": "uint256[]"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
 				"internalType": "address",
 				"name": "_donorAddress",
 				"type": "address"
@@ -646,25 +549,6 @@ const contractABI =  [
 				"internalType": "uint256",
 				"name": "reputationScore",
 				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_farmerAddress",
-				"type": "address"
-			}
-		],
-		"name": "getFarmerDisbursements",
-		"outputs": [
-			{
-				"internalType": "uint256[]",
-				"name": "",
-				"type": "uint256[]"
 			}
 		],
 		"stateMutability": "view",
@@ -768,19 +652,6 @@ const contractABI =  [
 	{
 		"inputs": [
 			{
-				"internalType": "uint256",
-				"name": "_disbursementId",
-				"type": "uint256"
-			}
-		],
-		"name": "reclaimExpiredFunds",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
 				"internalType": "string",
 				"name": "_name",
 				"type": "string"
@@ -858,6 +729,29 @@ const contractABI =  [
 		"type": "function"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_name",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_purpose",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_amountRequested",
+				"type": "uint256"
+			}
+		],
+		"name": "requestAid",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"inputs": [],
 		"name": "totalBeneficiaries",
 		"outputs": [
@@ -925,7 +819,7 @@ const contractABI =  [
 ]
 // Contract address - this would be the actual deployed contract address
 // const contractAddress = "0x45b9c0F889Fe2Bf137d9432Fd5c5D409b1B693b6";
-const contractAddress = "0xDEe41E6Be234f3bFdF7123054B02A301B57f8124";
+const contractAddress = "0x5342f637A47056Ca18aB6676C7dCddc2E102F661";
 
 // Global variables to store provider, signer, contract, and account
 let provider: ethers.BrowserProvider | null = null;
