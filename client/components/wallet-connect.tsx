@@ -56,7 +56,8 @@ export default function WalletConnect({
     try {
       const provider = new ethers.BrowserProvider(window.ethereum)
       const balance = await provider.getBalance(account)
-      setBalance(ethers.formatEther(balance)) // Convert balance to Ether
+      const formatted = parseFloat(ethers.formatEther(balance)).toFixed(4)
+      setBalance(formatted) // Convert balance to Ether
     } catch (error) {
       console.error("Error fetching balance:", error)
     }
@@ -93,12 +94,12 @@ export default function WalletConnect({
     setAddress(null)
     setBalance(null)
     setIsOwner(false)
-    
+
     toast({
       title: "Wallet Disconnected",
       description: "Your wallet has been disconnected from this app.",
     })
-    
+
     if (onDisconnect) {
       onDisconnect()
     }

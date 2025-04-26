@@ -28,8 +28,7 @@ export default function HowItWorksPage() {
           </CardHeader>
           <CardContent>
             <p className="text-gray-600 mb-4">
-              Both donors and farmers register on the platform by providing necessary information. The platform owner
-              verifies their identities to ensure legitimacy and build trust in the ecosystem.
+            Farmers and donors sign up on the platform by sharing basic information. The platform team verifies their identities to make sure everyone involved is real and trustworthy. This builds a safe and transparent community from the start.
             </p>
             <div className="flex items-center text-violet-600 font-medium">
               <Shield className="h-4 w-4 mr-2" />
@@ -44,13 +43,12 @@ export default function HowItWorksPage() {
               <div className="bg-pink-100 w-8 h-8 rounded-full flex items-center justify-center mr-3 text-pink-600">
                 2
               </div>
-              Disbursement Creation
+              Farmers Request Help, Donors Support
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-gray-600 mb-4">
-              Verified donors create disbursements by specifying the farmer, purpose, amount, and deadline for claiming
-              funds. The funds are locked in the smart contract until claimed or the deadline passes.
+            Verified farmers can ask for help by posting what they need - like money for seeds, tools, or water systems - and how much it will cost. Donors then browse these requests and choose which ones to support. Donations go directly to the farmer with full transparency.
             </p>
             <div className="flex items-center text-pink-600 font-medium">
               <Wallet className="h-4 w-4 mr-2" />
@@ -65,13 +63,12 @@ export default function HowItWorksPage() {
               <div className="bg-yellow-100 w-8 h-8 rounded-full flex items-center justify-center mr-3 text-yellow-600">
                 3
               </div>
-              Claiming & Feedback
+              Funds Delivered, Reputation Grows
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-gray-600 mb-4">
-              Farmers claim their funds before the deadline and use them to develop their farms. Successful claims
-              improve donor reputation scores, creating a virtuous cycle of trust and support.
+            When a farmer receives help and uses it properly, the donor’s trust score goes up. This encourages more honest giving and builds a strong cycle of support. If help isn’t claimed in time, the money is safely returned to the donor. Every action is recorded and visible to everyone — so nothing is hidden.
             </p>
             <div className="flex items-center text-yellow-600 font-medium">
               <Leaf className="h-4 w-4 mr-2" />
@@ -123,10 +120,10 @@ export default function HowItWorksPage() {
             </div>
             <div className="order-1 md:order-2">
               <Image
-                src="/placeholder.svg?height=300&width=500&text=Registration Process"
+                src="/registerandverify.jpg"
                 alt="Registration Process"
-                width={500}
-                height={300}
+                width={400}
+                height={200}
                 className="rounded-lg shadow-lg"
               />
             </div>
@@ -140,34 +137,31 @@ export default function HowItWorksPage() {
                 <div className="flex items-start">
                   <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 mr-3 flex-shrink-0" />
                   <p className="text-gray-600">
-                    <span className="font-medium text-gray-900">Selecting Recipients:</span> Verified donors browse
-                    through the farmer profiles and select recipients based on their needs, location, and farming
-                    practices.
+                    <span className="font-medium text-gray-900">Farmers Request Help: </span>  Verified farmers explain what they need, why they need it, and how much money is required - like support for seeds, irrigation, or tools.
                   </p>
                 </div>
                 <div className="flex items-start">
                   <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 mr-3 flex-shrink-0" />
                   <p className="text-gray-600">
-                    <span className="font-medium text-gray-900">Creating Disbursements:</span> Donors specify the
-                    amount, purpose, and claim deadline for each disbursement. The funds are locked in the smart
-                    contract.
+                    <span className="font-medium text-gray-900">Donors Choose Who to Support:</span>  Verified donors go through these requests and decide who they want to help, based on the farmer’s story, location, or type of farming.
                   </p>
                 </div>
                 <div className="flex items-start">
                   <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 mr-3 flex-shrink-0" />
                   <p className="text-gray-600">
-                    <span className="font-medium text-gray-900">Transparent Records:</span> All disbursements are
-                    recorded on the blockchain, creating a transparent and immutable record of the transaction.
+                    <span className="font-medium text-gray-900">Secure & Transparent Funding:</span> Once a donor sends support, the platform makes sure the money is safely sent to the right farmer and records everything openly on the blockchain — so nothing can be hidden or changed.
+
+
                   </p>
                 </div>
               </div>
             </div>
             <div className="md:order-1">
               <Image
-                src="/placeholder.svg?height=300&width=500&text=Disbursement Process"
+                src="/disbursementcreation.jpg"
                 alt="Disbursement Process"
-                width={500}
-                height={300}
+                width={300}
+                height={200}
                 className="rounded-lg shadow-lg"
               />
             </div>
@@ -176,37 +170,36 @@ export default function HowItWorksPage() {
           {/* Step 3 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div className="order-2 md:order-1">
-              <h3 className="text-2xl font-bold text-violet-900 mb-4">Claiming & Feedback</h3>
+              <h3 className="text-2xl font-bold text-violet-900 mb-4">Secure & Transparent Funding:</h3>
               <div className="space-y-4">
                 <div className="flex items-start">
                   <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 mr-3 flex-shrink-0" />
                   <p className="text-gray-600">
-                    <span className="font-medium text-gray-900">Claim Process:</span> Farmers receive notifications
-                    about available disbursements and can claim them before the deadline through their dashboard.
+                    <span className="font-medium text-gray-900">Farmers Receive the Help: </span> When a donor supports a farmer’s request, the farmer gets notified and can claim the funds directly into their wallet before the deadline.
                   </p>
                 </div>
                 <div className="flex items-start">
                   <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 mr-3 flex-shrink-0" />
                   <p className="text-gray-600">
-                    <span className="font-medium text-gray-900">Reputation System:</span> Successful claims improve
-                    donor reputation scores, creating incentives for continued support and responsible disbursement.
+                    <span className="font-medium text-gray-900">Building Trust Through Reputation:</span> Every time a donation is successfully claimed and used, the donor’s trust score goes up — encouraging more honest giving and long-term support.
                   </p>
                 </div>
                 <div className="flex items-start">
                   <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 mr-3 flex-shrink-0" />
                   <p className="text-gray-600">
-                    <span className="font-medium text-gray-900">Expired Claims:</span> If a farmer doesn't claim funds
-                    before the deadline, the donor can reclaim them, ensuring funds aren't locked indefinitely.
+                    <span className="font-medium text-gray-900">No Wasted Funds: </span> If a farmer doesn’t claim the help in time, the money safely goes back to the donor, making sure nothing is lost or stuck.
+
+
                   </p>
                 </div>
               </div>
             </div>
             <div className="order-1 md:order-2">
               <Image
-                src="/placeholder.svg?height=300&width=500&text=Claiming Process"
+                src="/securetransparentfunding.jpg"
                 alt="Claiming Process"
-                width={500}
-                height={300}
+                width={400}
+                height={200}
                 className="rounded-lg shadow-lg"
               />
             </div>

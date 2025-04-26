@@ -96,7 +96,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div>
+          {/* <div>
             <h3 className="font-medium text-lg mb-4">Subscribe to Our Newsletter</h3>
             <p className="text-violet-300 mb-4">Stay updated with the latest news and updates from FairFund.</p>
             <div className="flex space-x-2">
@@ -107,7 +107,7 @@ export default function Footer() {
               />
               <Button className="bg-pink-600 hover:bg-pink-700">Subscribe</Button>
             </div>
-          </div>
+          </div> */}
         </div>
 
         <div className="border-t border-violet-800 mt-12 pt-8 text-center text-violet-300 text-sm">

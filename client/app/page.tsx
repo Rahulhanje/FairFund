@@ -5,13 +5,14 @@ import Link from "next/link"
 import Image from "next/image"
 import StatsCounter from "@/components/stats-counter"
 import FarmerList from "./demo/page"
+import ContractStatsSection from "@/components/ContractStatsSection"
 
 export default function Home() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-violet-600 via-green-500 to-pink-500 py-20 md:py-32">
-        <div className="absolute inset-0 bg-[url('/placeholder.svg?height=500&width=1000')] bg-cover bg-center opacity-10"></div>
+      <section className="relative bg-gradient-to-br from-green-600 via-green-200 to-yellow-200 py-20 md:py-32">
+        <div className="absolute inset-0 bg-[url('/heroCoverImage.jpeg?height=500&width=1000')] bg-cover bg-center opacity-10"></div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div className="text-white">
@@ -24,14 +25,14 @@ export default function Home() {
                 <Button asChild size="lg" className="bg-yellow-400 hover:bg-yellow-500 text-violet-900">
                   <Link href="/register">Get Started</Link>
                 </Button>
-                <Button asChild size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+                <Button asChild size="lg"  className="border-white text-white hover:bg-green-700 bg-green-500">
                   <Link href="/about">Learn More</Link>
                 </Button>
               </div>
             </div>
             <div className="hidden md:block">
               <Image
-                src="/placeholder.svg?height=400&width=500"
+                src="personWithTab.jpg"
                 alt="Farmers working in field"
                 width={500}
                 height={400}
@@ -42,7 +43,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Stats Section */}
+      {/* Stats Section
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -56,7 +57,8 @@ export default function Home() {
             />
           </div>
         </div>
-      </section>
+      </section> */}
+      <ContractStatsSection/>
 
       {/* How It Works */}
       <section className="py-20 bg-gray-50">

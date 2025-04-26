@@ -1006,24 +1006,28 @@ export const registerFarmer = async (name: string, location: string, farmType: s
 
 // Get contract statistics
 export const getContractStats = async (): Promise<any> => {
-  if (!contract) await initializeEthers().catch(() => null)
-  try {
-    const stats = await contract?.getContractStats()
-    return {
-      totalDonors: stats?._totalDonors.toNumber() || 0,
-      totalBeneficiaries: stats?._totalBeneficiaries.toNumber() || 0,
-      totalFundsDistributed: Number.parseFloat(ethers.formatEther(stats?._totalFundsDistributed || 0)),
-    }
-  } catch (error) {
-    console.error("Error getting contract stats:", error)
-    // For demo purposes, return mock data
-    return {
-      totalDonors: 124,
-      totalBeneficiaries: 356,
-      totalFundsDistributed: 1250000,
-    }
+	if (!contract) await initializeEthers().catch(() => null)
+	try {
+	  const stats = await contract?.getContractStats()
+  
+	  // Log structure if you're debugging
+	  console.log("Contract stats:", stats)
+  
+	  return {
+		totalDonors: Number(stats?._totalDonors || 0),
+		totalBeneficiaries: Number(stats?._totalBeneficiaries || 0),
+		totalFundsDistributed: parseFloat(ethers.formatEther(stats?._totalFundsDistributed || 0)),
+	  }
+	} catch (error) {
+	  console.error("Error getting contract stats:", error)
+	  return {
+		totalDonors: 124,
+		totalBeneficiaries: 356,
+		totalFundsDistributed: 1250000,
+	  }
+	}
   }
-}
+  
 
 // Get donor statistics
 export const getDonorStats = async (address: string): Promise<any> => {

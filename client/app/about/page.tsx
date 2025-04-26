@@ -8,28 +8,29 @@ export default function AboutPage() {
   // Team members data
   const team = [
     {
-      name: "Sarah Johnson",
-      role: "Founder & CEO",
-      bio: "Sarah has over 15 years of experience in agricultural development and blockchain technology.",
-      image: "/placeholder.svg?height=200&width=200&text=SJ",
+      name: "Rahul S Hanje",
+      role: "DBIT ISE",
+      bio: "FullStack and Blockchain Developer",
+      image: "/Rahul.jpg?height=200&width=200&text=SJ",
     },
     {
-      name: "Michael Chen",
-      role: "CTO",
-      bio: "Michael is a blockchain expert with a passion for using technology to solve real-world problems.",
-      image: "/placeholder.svg?height=200&width=200&text=MC",
+      name: "Raghavendra K T",
+      role: "DBIT ISE",
+      bio: "FullStack and DevOps",
+      image: "/Raghavendra.jpg?height=200&width=200&text=AP",
     },
     {
-      name: "Aisha Patel",
-      role: "Head of Farmer Relations",
-      bio: "Aisha works directly with farmers to understand their needs and ensure the platform serves them effectively.",
-      image: "/placeholder.svg?height=200&width=200&text=AP",
+      name: "Rakshit M L",
+      role: "DBIT CSE",
+      bio: "Machine Learning and FullStack Developer",
+      image: "/Rakshit.jpg?height=200&width=200&text=MC",
     },
+    
     {
-      name: "Carlos Rodriguez",
-      role: "Head of Donor Relations",
-      bio: "Carlos manages relationships with donors and helps them maximize their impact through the platform.",
-      image: "/placeholder.svg?height=200&width=200&text=CR",
+      name: "Mohammad Armaan",
+      role: "DBIT CSE",
+      bio: "Software Developer",
+      image: "/armaan.jpg?height=200&width=200&text=CR",
     },
   ]
 
@@ -46,30 +47,20 @@ export default function AboutPage() {
       {/* Our Story */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-20">
         <div>
-          <h2 className="text-3xl font-bold text-violet-900 mb-6">Our Story</h2>
+          <h2 className="text-3xl font-bold text-violet-900 mb-6">Our Vision</h2>
           <div className="space-y-4 text-gray-600">
             <p>
-              FairFund was founded in 2023 with a simple but powerful idea: to create a transparent system that connects
-              donors directly with small farmers, eliminating intermediaries and ensuring that aid reaches those who
-              need it most.
+            At FairFund, we envision a world where small farmers thrive through direct, transparent access to the resources they need. By leveraging blockchain technology, we aim to eliminate inefficiencies and intermediaries in aid distribution—empowering farmers, restoring trust, and fostering sustainable agricultural growth across developing communities.
             </p>
-            <p>
-              Our founder, Sarah Johnson, witnessed firsthand the challenges faced by small farmers in developing
-              countries and the inefficiencies in traditional aid distribution systems. She believed that blockchain
-              technology could provide a solution by creating a transparent, immutable record of transactions.
-            </p>
-            <p>
-              Today, FairFund is a growing platform that has helped hundreds of farmers access the resources they need
-              to develop sustainable farming practices and improve their livelihoods.
-            </p>
+            
           </div>
         </div>
         <div className="flex justify-center">
           <Image
             src="/placeholder.svg?height=400&width=500&text=Our Story"
             alt="FairFund Story"
-            width={500}
-            height={400}
+            width={300}
+            height={300}
             className="rounded-lg shadow-xl"
           />
         </div>
@@ -162,7 +153,7 @@ export default function AboutPage() {
       </div>
 
       {/* Impact */}
-      <div className="mb-20">
+      {/* <div className="mb-20">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-violet-900 mb-4">Our Impact</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -184,7 +175,7 @@ export default function AboutPage() {
             <div className="text-lg text-yellow-700">Funds Distributed</div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* CTA Section */}
       <div className="bg-gradient-to-r from-violet-600 to-pink-500 text-white rounded-xl p-12 text-center">
@@ -197,7 +188,7 @@ export default function AboutPage() {
           <Button asChild size="lg" className="bg-yellow-400 hover:bg-yellow-500 text-violet-900">
             <Link href="/register?type=donor">Register as Donor</Link>
           </Button>
-          <Button asChild size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+          <Button asChild size="lg"  className="border-white text-white hover:bg-green-700 bg-green-600">
             <Link href="/register?type=farmer">Register as Farmer</Link>
           </Button>
         </div>

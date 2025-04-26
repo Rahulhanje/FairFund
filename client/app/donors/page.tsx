@@ -81,9 +81,9 @@ export default function DonorsPage() {
                   <p className="font-medium text-violet-900">{donor.totalDonated} ETH</p>
                 </div>
 
-                <Button asChild variant="outline" className="border-violet-200 text-violet-700 hover:bg-violet-50">
+                {/* <Button asChild variant="outline" className="border-violet-200 text-violet-700 hover:bg-violet-50">
                   <Link href={`/donors/${donor.address}`}>View Profile</Link>
-                </Button>
+                </Button> */}
               </div>
             </CardContent>
           </Card>

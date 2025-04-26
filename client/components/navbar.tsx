@@ -23,6 +23,7 @@ export default function Navbar() {
     { name: "About", path: "/about" },
     {name:"Aid", path:"/aid"},
     {name:"AllAid", path:"/AllAids"},
+    // {name:"Dashboard", path:"/dashboard"},
     ...(isOwner ? [{ name: "Admin", path: "/verification" }] : []),
   ]
 
@@ -79,10 +80,14 @@ export default function Navbar() {
           </Sheet>
 
           <Link href="/" className="flex items-center space-x-2">
-            <span className="font-bold text-xl bg-gradient-to-r from-violet-600 to-pink-500 text-transparent bg-clip-text">
-              FairFund
-            </span>
-          </Link>
+  <span className="font-bold text-xl bg-gradient-to-r from-green-600 to-lime-400 text-transparent bg-clip-text">
+    FairFund
+  </span>
+  <span className="text-xs font-semibold text-white bg-green-600 px-2 py-0.5 rounded-full shadow-sm">
+    Beta
+  </span>
+</Link>
+
         </div>
 
         <nav className="hidden lg:flex items-center gap-6">

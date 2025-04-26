@@ -206,9 +206,9 @@ export default function FarmersPage() {
                     <p className="font-medium text-violet-900">{farmer.totalReceived} ETH</p>
                   </div>
 
-                  <Button asChild variant="outline" className="border-violet-200 text-violet-700 hover:bg-violet-50">
+                  {/* <Button asChild variant="outline" className="border-violet-200 text-violet-700 hover:bg-violet-50">
                     <Link href={`/farmers/${farmer.id}`}>View Profile</Link>
-                  </Button>
+                  </Button> */}
                 </div>
               </CardContent>
             </Card>
