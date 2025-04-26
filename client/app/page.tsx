@@ -179,7 +179,7 @@ export default function Home() {
               <Button asChild size="lg" className="bg-yellow-400 hover:bg-yellow-500 text-violet-900">
                 <Link href="/register?type=donor">Register as Donor</Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+              <Button asChild size="lg"  className="border-white text-white hover:bg-green-700 bg-green-500">
                 <Link href="/register?type=farmer">Register as Farmer</Link>
               </Button>
             </div>
