@@ -57,10 +57,10 @@ export default function AboutPage() {
         </div>
         <div className="flex justify-center">
           <Image
-            src="/placeholder.svg?height=400&width=500&text=Our Story"
+            src="/vision.jpg"
             alt="FairFund Story"
-            width={300}
-            height={300}
+            width={400}
+            height={400}
             className="rounded-lg shadow-xl"
           />
         </div>

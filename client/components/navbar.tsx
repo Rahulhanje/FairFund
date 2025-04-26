@@ -19,10 +19,10 @@ export default function Navbar() {
     { name: "Home", path: "/" },
     { name: "Farmers", path: "/farmers" },
     { name: "Donors", path: "/donors" },
+    {name:"Request Aid", path:"/aid"},
+    {name:"All Requests", path:"/AllAids"},
     { name: "How It Works", path: "/how-it-works" },
     { name: "About", path: "/about" },
-    {name:"Aid", path:"/aid"},
-    {name:"AllAid", path:"/AllAids"},
     // {name:"Dashboard", path:"/dashboard"},
     ...(isOwner ? [{ name: "Admin", path: "/verification" }] : []),
   ]

@@ -23,7 +23,7 @@ export default function ContractStatsSection() {
   return (
     <section className="py-16 bg-white">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <StatsCounter
             title="Total Donors"
             value={stats.totalDonors}

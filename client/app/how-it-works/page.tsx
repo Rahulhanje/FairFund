@@ -160,7 +160,7 @@ export default function HowItWorksPage() {
               <Image
                 src="/disbursementcreation.jpg"
                 alt="Disbursement Process"
-                width={300}
+                width={400}
                 height={200}
                 className="rounded-lg shadow-lg"
               />
