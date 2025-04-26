@@ -1,4 +1,4 @@
-import { ethers, formatEther } from "ethers";
+import { ethers, formatEther, parseEther, formatEther as formatEtherUtil, BigNumberish, formatUnits, parseEther as parseEtherUtil } from "ethers";
 
 
 
@@ -1302,3 +1302,181 @@ export const getDonors = async (): Promise<any[]> => {
     return [];
   }
 };
+
+export interface AidRequest {
+	id: number;
+	farmer: string;
+	name: string;
+	purpose: string;
+	amountRequested: string;
+	amountFunded: string;
+	timestamp: number;
+	fulfilled: boolean;
+	percentFunded: number;
+  }
+
+  export const checkIsFarmer = async (address: string): Promise<boolean> => {
+	try {
+		if (!contract) await initializeEthers();
+	  return await contract!.isFarmerRegistered(address);
+	} catch (error) {
+	  console.error("Error checking farmer status:", error);
+	  return false;
+	}
+  };
+  
+  // Check if user is registered as donor
+  export const checkIsDonor = async (address: string): Promise<boolean> => {
+	try {
+		if (!contract) await initializeEthers();
+	  return await contract!.isDonorRegistered(address);
+	} catch (error) {
+	  console.error("Error checking donor status:", error);
+	  return false;
+	}
+  };
+  
+ 
+  
+  // Create new aid request
+  export const requestAid = async (name: string, purpose: string, amountEth: string): Promise<void> => {
+	try {
+		if (!contract) await initializeEthers();
+	  const amountInWei = ethers.parseEther(amountEth);
+	  const tx = await contract!.requestAid(name, purpose, amountInWei);
+	  await tx.wait();
+	} catch (error) {
+	  console.error("Error creating aid request:", error);
+	  throw error;
+	}
+  };
+  
+  // Fund an aid request
+//   export const fundAidRequest = async (requestId: number): Promise<void> => {
+// 	try {
+// 	//   const amountInWei = parseEther(amountEth);
+// 	  const tx = await contract!.fundAidRequest(requestId);
+// 	  await tx.wait();
+// 	} catch (error) {
+// 	  console.error("Error funding aid request:", error);
+// 	  throw error;
+// 	}
+//   };
+
+
+  export async function fundAidRequest(requestId: number, amount: string): Promise<boolean> {
+	try {
+	  
+		if(!contract) await initializeEthers();
+	  
+	  // Convert ETH amount to wei
+	  const amountInWei = parseEtherUtil(amount);
+	  
+	  // Call the fundAidRequest function with the value in the transaction
+	  const tx = await contract!.fundAidRequest(requestId, {
+		value: amountInWei,  // This sends ETH with the transaction
+		gasLimit: 300000     // Optional: You can set gas limit
+	  });
+	  
+	  // Wait for transaction to be mined
+	  await tx.wait();
+	  
+	  console.log('Aid request funded successfully', tx.hash);
+	  return true;
+	} catch (error) {
+	  console.error('Error funding aid request:', error);
+	  throw error;
+	}
+  }
+  
+  // Get all aid requests
+  export async function getAllAidRequests() {
+	try {
+		if (!contract) await initializeEthers();
+	  const result = await contract!.getAllAidRequests();
+	  
+	  // Extract the arrays from the result
+	  const { 
+		ids, 
+		farmerAddressesList, 
+		requestNames, 
+		purposes, 
+		amountsRequested, 
+		amountsFunded, 
+		timestamps, 
+		fulfilledStatuses 
+	  } = result;
+	  
+	  // Format the results into an array of objects
+	  const formattedRequests = [];
+	  for (let i = 0; i < ids.length; i++) {
+		// Ensure we're handling BigNumber objects correctly
+		const requestId = ids[i].toNumber ? ids[i].toNumber() : Number(ids[i]);
+		const requestTimestamp = timestamps[i].toNumber ? 
+		  timestamps[i].toNumber() * 1000 : Number(timestamps[i]) * 1000;
+		
+		let requestedAmount, fundedAmount;
+		
+		// Handle different ways the amounts might be returned
+		try {
+		  // If it's a BigNumber object from ethers
+		  requestedAmount = formatEther(amountsRequested[i]);
+		  fundedAmount = formatEther(amountsFunded[i]);
+		} catch (e) {
+		  // If it's a string or number
+		  requestedAmount = formatUnits(
+			amountsRequested[i].toString(), 
+			'ether'
+		  );
+		  fundedAmount = formatUnits(
+			amountsFunded[i].toString(), 
+			'ether'
+		  );
+		}
+		
+		formattedRequests.push({
+		  id: requestId,
+		  farmer: farmerAddressesList[i],
+		  name: requestNames[i],
+		  purpose: purposes[i],
+		  amountRequested: requestedAmount,
+		  amountFunded: fundedAmount,
+		  timestamp: new Date(requestTimestamp),
+		  fulfilled: fulfilledStatuses[i]
+		});
+	  }
+	  
+	  return formattedRequests;
+	} catch (error) {
+	  console.error("Error fetching aid requests:", error);
+	  return []; // Return empty array on error
+	}
+  }
+  export async function getFarmerDetails(address: string) {
+	try {
+		if (!contract) await initializeEthers();
+	  const farmerData = await contract!.getFarmerStats(address);
+	  return {
+		name: farmerData[0],
+		location: farmerData[1],
+		farmType: farmerData[2],
+		isVerified: farmerData[3],
+		totalReceived: farmerData[4],
+		lastDisbursementDate: farmerData[5],
+	  };
+	} catch (error) {
+	  console.error("Error fetching farmer details:", error);
+	  return null;
+	}
+  }
+
+
+  // Helper functions
+  export const formatDate = (timestamp: number): string => {
+	return new Date(timestamp * 1000).toLocaleDateString();
+  };
+  
+// Helper function to truncate Ethereum addresses
+export function truncateAddress(address: string): string {
+  return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+}

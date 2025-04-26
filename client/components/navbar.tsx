@@ -1,5 +1,4 @@
 "use client"
-
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -22,6 +21,8 @@ export default function Navbar() {
     { name: "Donors", path: "/donors" },
     { name: "How It Works", path: "/how-it-works" },
     { name: "About", path: "/about" },
+    {name:"Aid", path:"/aid"},
+    {name:"AllAid", path:"/AllAids"},
     ...(isOwner ? [{ name: "Admin", path: "/verification" }] : []),
   ]
 
