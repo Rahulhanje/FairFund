@@ -121,7 +121,7 @@ export default function Home() {
       </section>
 
       {/* Featured Farmers */}
-      <section className="py-20 bg-white">
+      {/* <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-violet-900 mb-4">Featured Farmers</h2>
@@ -165,7 +165,7 @@ export default function Home() {
             </Button>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-r from-violet-600 to-pink-500 text-white">
@@ -185,7 +185,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <FarmerList/>
+        {/* <FarmerList/> */}
       </section>
     </div>
   )
